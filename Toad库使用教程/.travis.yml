@@ -1,0 +1,76 @@
+matrix:
+  include:
+    - name: "Python 3.6 on Linux"
+      os: linux
+      language: python
+      python: "3.6"
+      sudo: required
+      services:
+        - docker
+      env:
+        - DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+        - PLAT=manylinux1_x86_64
+      before_install:
+          - sudo apt-get install -y graphviz
+      dist: trusty
+      before_deploy:
+          - make dist_manylinux
+
+    - name: "Python 3.7 on macOS"
+      os: osx
+      osx_image: xcode11.3
+      language: shell
+      env:
+        - SUDO=sudo
+        - HOMEBREW_NO_INSTALL_CLEANUP=TRUE
+      before_install:
+          - brew update
+          # - brew install graphviz
+      before_deploy:
+          - make dist_wheel
+
+    - name: "Python 3.7 on Windows"
+      os: windows
+      language: shell
+      python: "3.7"
+      env:
+          - PATH=/c/Python37:/c/Python37/Scripts:$PATH
+      before_install:
+          - choco install python --version=3.7.2
+          - choco install graphviz
+          - choco install make
+      before_deploy:
+          - make dist_wheel
+
+    - name: "Python 3.6 on Windows"
+      os: windows
+      language: shell
+      python: "3.6"
+      env:
+          - PATH=/c/Python36:/c/Python36/Scripts:$PATH
+      before_install:
+          - choco install python --version=3.6.8
+          - choco install graphviz
+          - choco install make
+          - pip install -U patsy
+      before_deploy:
+          - make dist_wheel
+
+
+install:
+    - make install
+script:
+    - make test
+
+deploy:
+  - skip_cleanup: true
+    provider: script
+    script: make upload
+    on:
+      tags: true
+
+  - skip_cleanup: true
+    provider: script
+    script: make upload
+    on:
+      branch: release

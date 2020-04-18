@@ -1,0 +1,6 @@
+numpy
+Cython
+recommonmark
+sphinx-rtd-theme
+ipykernel
+nbsphinx
